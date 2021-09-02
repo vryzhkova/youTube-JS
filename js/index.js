@@ -1,6 +1,8 @@
 const API_KEY = 'AIzaSyAACjuuqhP75dMNaP3Mx6HLw1pIPT1WZNo';
 const CLIENT_ID = '922443871092-kmcnfm5krva29ng7frsu73tjooui9sku.apps.googleusercontent.com';
 
+const CLIENT_ID1 = '922443871092-kmcnfm5krva29ng7frsu73tjooui9sku.apps.googleusercontent.com';
+
 const gloAcademyList = document.querySelector('.glo-academy-list');
 const trendingList = document.querySelector('.trending-list');
 const musicList = document.querySelector('.music-list');
@@ -47,3 +49,62 @@ const createList = (wrapper, listVideo) => {
 createList(gloAcademyList, gloAcademy);
 createList(trendingList, trending);
 createList(musicList, music);
+
+// YouTubeAPI
+
+const authBtn = document.querySelector('.auth-btn');
+const userAvatar = document.querySelector('.user-avatar');
+
+const handleSuccessAuth = (data) => {
+    authBtn.classList.add('hide');
+    userAvatar.classList.remove('hide');
+    userAvatar.src = '';
+    userAvatar.alt = '';
+}
+
+const handleNoAuth = () => {
+    authBtn.classList.remove('hide');
+    userAvatar.classList.add('hide');
+    userAvatar.src = '';
+    userAvatar.alt = '';
+}
+
+const handleAuth = () => {
+    gapi.auth2.getAuthInstance().signIn();
+};
+
+const handleSignOut = () => {
+    gapi.auth2.getAuthInstance().signOut();
+};
+
+const updateStatusAuth = (data) => {
+    data.isSignedIn.listen(() => {
+        updateStatusAuth(data);
+    });
+
+    if (data.isSignedIn.get()) {
+        const userData = data.currentUser.get().getBasicProfile();
+        handleSuccessAuth(userData);
+    } else {
+        handleNoAuth();
+    }
+}
+
+function initClient() {
+    gapi.client.init({
+        // 'apiKey': API_KEY,
+        'clientId': CLIENT_ID1,
+        'scope': 'https://www.googleapis.com/auth/youtube.readonly',
+        'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
+    }).then(() => {
+        updateStatusAuth(gapi.auth2.getAuthInstance())
+        authBtn.addEventListener('click', handleAuth);
+        userAvatar.addEventListener('click', handleSignOut);
+    }).catch(() => {
+        authBtn.addEventListener('click', handleAuth);
+        userAvatar.addEventListener('click', handleSignOut);
+        alert('Авторизация невозможна!')
+    })
+}
+
+gapi.load('client:auth2', initClient);
