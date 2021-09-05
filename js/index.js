@@ -58,8 +58,10 @@ const userAvatar = document.querySelector('.user-avatar');
 const handleSuccessAuth = (data) => {
     authBtn.classList.add('hide');
     userAvatar.classList.remove('hide');
-    userAvatar.src = '';
-    userAvatar.alt = '';
+    userAvatar.src = data.getImageUrl();
+    userAvatar.alt = data.getName();
+
+    getChanel();
 }
 
 const handleNoAuth = () => {
@@ -92,7 +94,7 @@ const updateStatusAuth = (data) => {
 
 function initClient() {
     gapi.client.init({
-        // 'apiKey': API_KEY,
+        'apiKey': API_KEY,
         'clientId': CLIENT_ID1,
         'scope': 'https://www.googleapis.com/auth/youtube.readonly',
         'discoveryDocs': ['https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest']
@@ -100,11 +102,23 @@ function initClient() {
         updateStatusAuth(gapi.auth2.getAuthInstance())
         authBtn.addEventListener('click', handleAuth);
         userAvatar.addEventListener('click', handleSignOut);
-    }).catch(() => {
-        authBtn.addEventListener('click', handleAuth);
-        userAvatar.addEventListener('click', handleSignOut);
-        alert('Авторизация невозможна!')
-    })
+
+    });
+    // }).catch(() => {
+    //     authBtn.addEventListener('click', handleAuth);
+    //     userAvatar.addEventListener('click', handleSignOut);
+    //     alert('Авторизация невозможна!')
+    // })
 }
 
 gapi.load('client:auth2', initClient);
+
+
+const getChanel = () => {
+    gapi.client.youtube.channels.list({
+        part: 'snippet, statistics',
+        id: 'GloAcademyChannel',
+    }).execute((response) => {
+        console.log(response);
+    })
+}
